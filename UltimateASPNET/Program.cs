@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.HttpOverrides;
 using NLog;
@@ -29,10 +30,11 @@ namespace UltimateASPNET
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-                app.UseDeveloperExceptionPage();
-            else
+            app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILoggerManager>());
+            if (app.Environment.IsProduction())
+            {
                 app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
 
