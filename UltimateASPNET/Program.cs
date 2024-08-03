@@ -31,6 +31,7 @@ namespace UltimateASPNET
             var app = builder.Build();
 
             app.ConfigureExceptionHandler(app.Services.GetRequiredService<ILoggerManager>());
+
             if (app.Environment.IsProduction())
             {
                 app.UseHsts();
