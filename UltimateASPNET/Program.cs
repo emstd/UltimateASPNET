@@ -1,6 +1,6 @@
 using Contracts;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 using UltimateASPNET.Extensions;
 
@@ -24,6 +24,11 @@ namespace UltimateASPNET
             builder.Services.ConfigureSqlContext(builder.Configuration);
 
             builder.Services.AddAutoMapper(typeof(Program));
+
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
             builder.Services.AddControllers(config =>
             {

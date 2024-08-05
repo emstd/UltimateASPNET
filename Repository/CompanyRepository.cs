@@ -7,6 +7,11 @@ namespace Repository
     {
         public CompanyRepository(RepositoryContext context) : base(context) { }
 
+        public void CreateCompany(Company company)
+        {
+            Create(company);
+        }
+
         public IEnumerable<Company> GetAllCompanies(bool trackChanges)
         {
             return FindAll(trackChanges).OrderBy(c => c.Name).ToList();
