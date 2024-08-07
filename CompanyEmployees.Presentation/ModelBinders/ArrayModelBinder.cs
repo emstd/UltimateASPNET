@@ -37,7 +37,6 @@ namespace CompanyEmployees.Presentation.ModelBinders
             bindingContext.Result = ModelBindingResult.Success(bindingContext.Model);
 
             return Task.CompletedTask;
-
         }
     }
 }
