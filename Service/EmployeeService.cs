@@ -84,5 +84,23 @@ namespace Service
             _repository.Employee.DeleteEmployee(employeeForCompany);
             _repository.Save();
         }
+
+        public void UpdateEmployeeForCompany(Guid companyId, Guid id, EmployeeForUpdateDto employeeForUpdate, bool compTrackChanges, bool empTrackChanges)
+        {
+            var company = _repository.Company.GetCompany(companyId, compTrackChanges);
+            if (company is null)
+                throw new CompanyNotFoundException(companyId);
+
+            var employeeEntity = _repository.Employee.GetEmployee(companyId, id, empTrackChanges);
+            if (employeeEntity is null)
+                throw new EmployeeNotFoundException(id);
+
+            //Мы не используем метод Update из базового репозитория. Просто обновляем поля
+            //объекта, на который ссылается employeeEntity (предварительно запросили объект из БД) и вызывам Save(). Таким образом обновляем сущность.
+            //Это называется connected update. А вот disconnected update с вызовом context.Update() используется
+            //для обновления сущности без запроса ее из БД - в этом случае мы просто говорим EF отслеживать сущность и меняем статус на modified
+            _mapper.Map(employeeForUpdate, employeeEntity);
+            _repository.Save();
+        }
     }
 }
