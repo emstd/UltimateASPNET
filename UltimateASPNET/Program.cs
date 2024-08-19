@@ -36,7 +36,11 @@ namespace UltimateASPNET
             {
                 config.RespectBrowserAcceptHeader = true;
                 config.ReturnHttpNotAcceptable = true;
-                config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+                //Вставка форматтера NewtonsoftJsonPatchInputFormatter в начало списка форматтеров
+                //влияет на обработку JSON Patch запросов, но не затрагивает форматтеры System.Text.Json для обычных JSON запросов.
+                //Этот форматтер добавляется в начало, чтобы гарантировать, что он будет использоваться для обработки запросов
+                //с типом контента application/json-patch+json.
+               config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
             }).AddXmlDataContractSerializerFormatters()
             .AddCustomCSVFormatter()
             .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
@@ -66,6 +70,10 @@ namespace UltimateASPNET
 
             app.Run();
 
+            //Локальная функция - создаем контейнер, добавляем базовую настройку логгирования и MVC
+            //с поддержкой JSON, используя Newtonsoft.Json. Собираем провайдер сервисов. 
+            //Из провайдера сервисов извлекаем опции MvcOptions, среди которых находится коллекция InputFormatters.
+            //Возвращаем первый форматтер типа NewtonsoftJsonPatchInputFormatter из этой коллекции.
             NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
                 new ServiceCollection().AddLogging().AddMvc().AddNewtonsoftJson()
                     .Services.BuildServiceProvider()
