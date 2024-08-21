@@ -27,6 +27,7 @@ namespace UltimateASPNET
 
             builder.Services.AddAutoMapper(typeof(Program));
 
+            //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
@@ -70,7 +71,7 @@ namespace UltimateASPNET
 
             app.Run();
 
-            //Локальная функция - создаем контейнер, добавляем базовую настройку логгирования и MVC
+            //Локальная функция - создаем временный контейнер, добавляем базовую настройку логгирования и MVC
             //с поддержкой JSON, используя Newtonsoft.Json. Собираем провайдер сервисов. 
             //Из провайдера сервисов извлекаем опции MvcOptions, среди которых находится коллекция InputFormatters.
             //Возвращаем первый форматтер типа NewtonsoftJsonPatchInputFormatter из этой коллекции.
