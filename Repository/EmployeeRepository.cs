@@ -20,7 +20,11 @@ namespace Repository
                 .Take(employeeParameters.PageSize)
                 .ToListAsync();
 
-            var count = await FindByCondition(e => e.CompanyId.Equals(companyId) && (e.Age >= employeeParameters.MinAge && e.Age <= employeeParameters.MaxAge), trackChanges).CountAsync();
+            var count = await FindByCondition(e => e.CompanyId.Equals(companyId), trackChanges)
+                .FilterEmployees(employeeParameters.MinAge, employeeParameters.MaxAge)
+                .Search(employeeParameters.SearchTerm)
+                .Sort(employeeParameters.OrderBy)
+                .CountAsync();
 
             return new PagedList<Employee>(employees, count, employeeParameters.PageNumber, employeeParameters.PageSize);
         }
