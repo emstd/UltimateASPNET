@@ -1,12 +1,12 @@
+using System.Collections;
+using System.Dynamic;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
+using Entities.LinkModels;
+
 namespace Entities.Models
 {
-    using System.Collections;
-    using System.Dynamic;
-    using System.Xml;
-    using System.Xml.Schema;
-    using System.Xml.Serialization;
-    using Entities.LinkModels;
-
     public class Entity : DynamicObject, IXmlSerializable, IDictionary<string, object>
     {
         private readonly string _root = "Entity";

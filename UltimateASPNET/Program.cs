@@ -8,6 +8,7 @@ using NLog;
 using Service.DataShaping;
 using Shared.DataTransferObjects;
 using UltimateASPNET.Extensions;
+using UltimateASPNET.Utility;
 
 namespace UltimateASPNET
 {
@@ -39,6 +40,9 @@ namespace UltimateASPNET
             });
 
             builder.Services.AddScoped<ValidationFilterAttribute>();
+            builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+
+            builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 
             builder.Services.AddControllers(config =>
             {
@@ -52,6 +56,8 @@ namespace UltimateASPNET
             }).AddXmlDataContractSerializerFormatters()
             .AddCustomCSVFormatter()
             .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
+            builder.Services.AddCustomMediaTypes();
 
             var app = builder.Build();
 
