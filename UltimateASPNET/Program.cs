@@ -28,10 +28,12 @@ namespace UltimateASPNET
             builder.Services.ConfigureRepositoryManager();
             builder.Services.ConfigureServiceManager();
             builder.Services.ConfigureSqlContext(builder.Configuration);
+            builder.Services.AddAutoMapper(typeof(Program));
 
             builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
+            builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 
-            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.ConfigureVersioning();
 
             //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -42,7 +44,6 @@ namespace UltimateASPNET
             builder.Services.AddScoped<ValidationFilterAttribute>();
             builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
-            builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 
             builder.Services.AddControllers(config =>
             {
