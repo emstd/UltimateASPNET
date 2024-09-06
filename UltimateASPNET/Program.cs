@@ -34,6 +34,7 @@ namespace UltimateASPNET
             builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 
             builder.Services.ConfigureVersioning();
+            builder.Services.ConfigureResponseCaching();
 
             //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -78,6 +79,7 @@ namespace UltimateASPNET
             });
 
             app.UseCors("CorsPolicy");
+            app.UseResponseCaching();
 
             app.UseAuthorization();
 
