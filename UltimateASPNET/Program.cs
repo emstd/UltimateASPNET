@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using CompanyEmployees.Presentation.ActionFilters;
 using Contracts;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -35,6 +36,11 @@ namespace UltimateASPNET
 
             builder.Services.ConfigureVersioning();
             builder.Services.ConfigureResponseCaching();
+            builder.Services.ConfigureHttpCacheHeaders();
+
+            builder.Services.AddMemoryCache();  //Для библиотеки RateLimit
+            builder.Services.ConfigureRateLimitingOptions();
+            builder.Services.AddHttpContextAccessor();
 
             //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -45,7 +51,6 @@ namespace UltimateASPNET
             builder.Services.AddScoped<ValidationFilterAttribute>();
             builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
-
             builder.Services.AddControllers(config =>
             {
                 config.RespectBrowserAcceptHeader = true;
@@ -54,7 +59,8 @@ namespace UltimateASPNET
                 //влияет на обработку JSON Patch запросов, но не затрагивает форматтеры System.Text.Json для обычных JSON запросов.
                 //Этот форматтер добавляется в начало, чтобы гарантировать, что он будет использоваться для обработки запросов
                 //с типом контента application/json-patch+json.
-               config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+                config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+                config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
             }).AddXmlDataContractSerializerFormatters()
             .AddCustomCSVFormatter()
             .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
@@ -78,8 +84,10 @@ namespace UltimateASPNET
                 ForwardedHeaders = ForwardedHeaders.All
             });
 
+            app.UseIpRateLimiting();
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
 
             app.UseAuthorization();
 
