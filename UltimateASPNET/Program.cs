@@ -42,6 +42,9 @@ namespace UltimateASPNET
             builder.Services.ConfigureRateLimitingOptions();
             builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddAuthentication();
+            builder.Services.ConfigureIdentity();
+
             //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
