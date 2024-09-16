@@ -92,6 +92,7 @@ namespace UltimateASPNET
             app.UseResponseCaching();
             app.UseHttpCacheHeaders();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
