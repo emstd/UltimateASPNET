@@ -44,6 +44,7 @@ namespace UltimateASPNET
 
             builder.Services.AddAuthentication();
             builder.Services.ConfigureIdentity();
+            builder.Services.ConfigureJWT(builder.Configuration);
 
             //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
