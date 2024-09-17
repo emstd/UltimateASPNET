@@ -3,8 +3,12 @@ using Contracts;
 using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Service.Contracts;
 using Shared.DataTransferObjects;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Service
 {
@@ -14,6 +18,7 @@ namespace Service
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private User? _user;
         public AuthenticationService(ILoggerManager logger, IMapper mapper, UserManager<User> userManager,
             IConfiguration configuration)
         {
@@ -22,6 +27,7 @@ namespace Service
             _userManager = userManager;
             _configuration = configuration;
         }
+
         public async Task<IdentityResult> RegisterUser(UserForRegistrationDto userForRegistration)
         {
             var user = _mapper.Map<User>(userForRegistration);
@@ -33,6 +39,71 @@ namespace Service
             }
 
             return result;
+        }
+        public async Task<bool> ValidateUser(UserForAuthenticationDto userForAuth)
+        {
+            _user = await _userManager.FindByNameAsync(userForAuth.UserName);
+
+            var result = (_user != null && 
+                await _userManager.CheckPasswordAsync(_user, userForAuth.Password));
+
+            if (!result)
+            {
+                _logger.LogWarn($"{nameof(ValidateUser)}: Authentication failed. Wrong user name or password.");
+            }
+
+            return result;
+        }
+
+        public async Task<string> CreateToken()
+        {
+            var signingCredentials = GetSigningCredentials();
+            var claims = await GetClaims();
+            var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+
+            return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+        }
+
+        private SigningCredentials GetSigningCredentials()
+        {
+            string kkey = _configuration.GetSection("JwtSettings")["SecretKey"];
+            var key = Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings")["SecretKey"]);
+            var secret = new SymmetricSecurityKey(key);
+
+            return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
+        }
+
+        private async Task<List<Claim>> GetClaims()
+        {
+            var Claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, _user.UserName)
+            };
+
+            var roles = await _userManager.GetRolesAsync(_user);
+            foreach (var role in roles)
+            {
+                Claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            return Claims;
+        }
+
+        private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials,
+            List<Claim> claims)
+        {
+            var jwtSettings = _configuration.GetSection("JwtOptions");
+
+            var tokenOptions = new JwtSecurityToken
+                (
+                    issuer: jwtSettings["ValidIssuer"],
+                    audience: jwtSettings["ValidAudience"],
+                    claims: claims,
+                    expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["Expires"])),
+                    signingCredentials: signingCredentials
+                );
+
+            return tokenOptions;
         }
     }
 }
