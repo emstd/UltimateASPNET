@@ -149,7 +149,7 @@ namespace UltimateASPNET.Extensions
 
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwtSetting = configuration.GetSection("JwtSettings");
+            var jwtSettings = configuration.GetSection("JwtSettings");
 
             services.AddAuthentication(opt =>
             {
@@ -164,9 +164,9 @@ namespace UltimateASPNET.Extensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSetting["ValidIssuer"],
-                    ValidAudience = jwtSetting["ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting["SecretKey"]))
+                    ValidIssuer = jwtSettings["ValidIssuer"],
+                    ValidAudience = jwtSettings["ValidAudience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
                 };
             });
         }

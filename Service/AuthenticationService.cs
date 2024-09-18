@@ -66,8 +66,8 @@ namespace Service
 
         private SigningCredentials GetSigningCredentials()
         {
-            string kkey = _configuration.GetSection("JwtSettings")["SecretKey"];
-            var key = Encoding.UTF8.GetBytes(_configuration.GetSection("JwtSettings")["SecretKey"]);
+            var kkey = _configuration.GetSection("JwtSettings");
+            var key = Encoding.UTF8.GetBytes(kkey["SecretKey"]);
             var secret = new SymmetricSecurityKey(key);
 
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
@@ -92,7 +92,7 @@ namespace Service
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials,
             List<Claim> claims)
         {
-            var jwtSettings = _configuration.GetSection("JwtOptions");
+            var jwtSettings = _configuration.GetSection("JwtSettings");
 
             var tokenOptions = new JwtSecurityToken
                 (
