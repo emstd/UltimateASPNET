@@ -1,6 +1,7 @@
 ﻿using AspNetCoreRateLimit;
 using CompanyEmployees.Presentation.Controllers;
 using Contracts;
+using Entities.ConfigurationModels;
 using Entities.Models;
 using LoggerService;
 using Marvin.Cache.Headers;
@@ -149,7 +150,8 @@ namespace UltimateASPNET.Extensions
 
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwtSettings = configuration.GetSection("JwtSettings");
+            var jwtConfiguration = new JwtConfiguration();
+            configuration.Bind(jwtConfiguration.Section, jwtConfiguration);
 
             services.AddAuthentication(opt =>
             {
@@ -164,11 +166,16 @@ namespace UltimateASPNET.Extensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["ValidIssuer"],
-                    ValidAudience = jwtSettings["ValidAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]))
+                    ValidIssuer = jwtConfiguration.ValidIssuer,
+                    ValidAudience = jwtConfiguration.ValidAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecretKey))
                 };
             });
+        }
+
+        public static void AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
         }
     }
 }
