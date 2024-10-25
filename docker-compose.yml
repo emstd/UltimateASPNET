@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  ultimateaspnet:
+    image: emstd/ultimateaspnet:runtime
+    build: 
+      context: .
+    ports:
+      - "8080:5000"
+      - "8081:5001"
+    environment:
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=awesomepass
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/ultimateaspnet.pfx
+    volumes:
+      - ${USERPROFILE}/.aspnet/https:/https/
