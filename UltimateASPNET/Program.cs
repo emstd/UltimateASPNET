@@ -10,6 +10,7 @@ using Service.DataShaping;
 using Shared.DataTransferObjects;
 using UltimateASPNET.Extensions;
 using UltimateASPNET.Utility;
+using Repository;
 
 namespace UltimateASPNET
 {
@@ -38,7 +39,7 @@ namespace UltimateASPNET
             builder.Services.ConfigureResponseCaching();
             builder.Services.ConfigureHttpCacheHeaders();
 
-            builder.Services.AddMemoryCache();  //Для библиотеки RateLimit
+            builder.Services.AddMemoryCache();  //Р”Р»СЏ Р±РёР±Р»РёРѕС‚РµРєРё RateLimit
             builder.Services.ConfigureRateLimitingOptions();
             builder.Services.AddHttpContextAccessor();
 
@@ -49,7 +50,7 @@ namespace UltimateASPNET
 
             builder.Services.ConfigureSwagger();
 
-            //Отключаем дефолтную валидацию моделей, которую делает атрибут [ApiController]
+            //РћС‚РєР»СЋС‡Р°РµРј РґРµС„РѕР»С‚РЅСѓСЋ РІР°Р»РёРґР°С†РёСЋ РјРѕРґРµР»РµР№, РєРѕС‚РѕСЂСѓСЋ РґРµР»Р°РµС‚ Р°С‚СЂРёР±СѓС‚ [ApiController]
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
@@ -62,10 +63,10 @@ namespace UltimateASPNET
             {
                 config.RespectBrowserAcceptHeader = true;
                 config.ReturnHttpNotAcceptable = true;
-                //Вставка форматтера NewtonsoftJsonPatchInputFormatter в начало списка форматтеров
-                //влияет на обработку JSON Patch запросов, но не затрагивает форматтеры System.Text.Json для обычных JSON запросов.
-                //Этот форматтер добавляется в начало, чтобы гарантировать, что он будет использоваться для обработки запросов
-                //с типом контента application/json-patch+json.
+                //Р’СЃС‚Р°РІРєР° С„РѕСЂРјР°С‚С‚РµСЂР° NewtonsoftJsonPatchInputFormatter РІ РЅР°С‡Р°Р»Рѕ СЃРїРёСЃРєР° С„РѕСЂРјР°С‚С‚РµСЂРѕРІ
+                //РІР»РёСЏРµС‚ РЅР° РѕР±СЂР°Р±РѕС‚РєСѓ JSON Patch Р·Р°РїСЂРѕСЃРѕРІ, РЅРѕ РЅРµ Р·Р°С‚СЂР°РіРёРІР°РµС‚ С„РѕСЂРјР°С‚С‚РµСЂС‹ System.Text.Json РґР»СЏ РѕР±С‹С‡РЅС‹С… JSON Р·Р°РїСЂРѕСЃРѕРІ.
+                //Р­С‚РѕС‚ С„РѕСЂРјР°С‚С‚РµСЂ РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІ РЅР°С‡Р°Р»Рѕ, С‡С‚РѕР±С‹ РіР°СЂР°РЅС‚РёСЂРѕРІР°С‚СЊ, С‡С‚Рѕ РѕРЅ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё Р·Р°РїСЂРѕСЃРѕРІ
+                //СЃ С‚РёРїРѕРј РєРѕРЅС‚РµРЅС‚Р° application/json-patch+json.
                 config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
                 config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
             }).AddXmlDataContractSerializerFormatters()
@@ -108,12 +109,12 @@ namespace UltimateASPNET
 
             app.MapControllers();
 
-            app.Run();
+            app.MigrateDatabase().Run();
 
-            //Локальная функция - создаем временный контейнер, добавляем базовую настройку логгирования и MVC
-            //с поддержкой JSON, используя Newtonsoft.Json. Собираем провайдер сервисов. 
-            //Из провайдера сервисов извлекаем опции MvcOptions, среди которых находится коллекция InputFormatters.
-            //Возвращаем первый форматтер типа NewtonsoftJsonPatchInputFormatter из этой коллекции.
+            //Р›РѕРєР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ - СЃРѕР·РґР°РµРј РІСЂРµРјРµРЅРЅС‹Р№ РєРѕРЅС‚РµР№РЅРµСЂ, РґРѕР±Р°РІР»СЏРµРј Р±Р°Р·РѕРІСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ Р»РѕРіРіРёСЂРѕРІР°РЅРёСЏ Рё MVC
+            //СЃ РїРѕРґРґРµСЂР¶РєРѕР№ JSON, РёСЃРїРѕР»СЊР·СѓСЏ Newtonsoft.Json. РЎРѕР±РёСЂР°РµРј РїСЂРѕРІР°Р№РґРµСЂ СЃРµСЂРІРёСЃРѕРІ. 
+            //РР· РїСЂРѕРІР°Р№РґРµСЂР° СЃРµСЂРІРёСЃРѕРІ РёР·РІР»РµРєР°РµРј РѕРїС†РёРё MvcOptions, СЃСЂРµРґРё РєРѕС‚РѕСЂС‹С… РЅР°С…РѕРґРёС‚СЃСЏ РєРѕР»Р»РµРєС†РёСЏ InputFormatters.
+            //Р’РѕР·РІСЂР°С‰Р°РµРј РїРµСЂРІС‹Р№ С„РѕСЂРјР°С‚С‚РµСЂ С‚РёРїР° NewtonsoftJsonPatchInputFormatter РёР· СЌС‚РѕР№ РєРѕР»Р»РµРєС†РёРё.
             NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
                 new ServiceCollection().AddLogging().AddMvc().AddNewtonsoftJson()
                     .Services.BuildServiceProvider()
